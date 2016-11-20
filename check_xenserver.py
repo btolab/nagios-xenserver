@@ -429,6 +429,8 @@ if __name__ == "__main__":
         exclude_srs = config.get(args.pool,"exclude_srs").split(',')
         [x.strip() for x in exclude_srs]
         check_args["exclude_srs"] = exclude_srs
+    else:
+        check_args["exclude_srs"] = []
     
     # First acquire a valid session by logging in:
     try:
