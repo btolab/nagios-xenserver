@@ -417,7 +417,10 @@ if __name__ == "__main__":
     # We store the arguments in a dict to send them to the checks
     check_args = {}
     
-    check_args["perfdata"] = config.get("general","perfdata_format")
+    try:
+        check_args["perfdata"] = config.get("general","perfdata_format")
+    except:
+        check_args['perfdata'] = None
     
     if hasattr(args,"warning"):
         check_args["warning"]  = args.warning
