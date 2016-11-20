@@ -406,7 +406,10 @@ if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config.readfp(open(args.config))
     
-    host = config.get(args.pool,'host')
+    try:
+        host = config.get(args.pool,'host')
+    except:
+        host = args.pool
     
     username = config.get(args.pool,"username")
     password = config.get(args.pool,"password")
