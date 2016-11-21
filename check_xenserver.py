@@ -327,12 +327,17 @@ def check_cpu(session, args):
     params['host'] = "true"
     
     perfdata = {}
+    host_cpu_records = session.xenapi.host_cpu.get_all_records()
+
     for host in hosts:
         v= []
         url = 'https://'+session.xenapi.host.get_address(host)
         rrd_updates = parse_rrd.RRDUpdates()
         rrd_updates.refresh(session.handle, params, url)
-        paramList = ['cpu'+session.xenapi.host_cpu.get_record(i)['number'] for i in session.xenapi.host_cpu.get_all_records() if host in session.xenapi.host_cpu.get_record(i)['host'] ]
+        paramList = []
+        for hcr_ref, hcr in host_cpu_records.items():
+            if host in hcr['host']:
+                paramList.append('cpu'+hcr['number'])
         for param in rrd_updates.get_host_param_list():
             if param in paramList:
                 max_time=0
