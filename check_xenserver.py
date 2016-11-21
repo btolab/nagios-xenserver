@@ -209,12 +209,11 @@ def check_sr(session, args):
 
     sys.exit(finalexit)
         
-def mem(session, host, warning, critical, performancedata_format):
+def mem(hostname, metric, warning, critical, performancedata_format):
 
-    if host:
-        hostname          = session.xenapi.host.get_name_label(host)
-        mem_size          = session.xenapi.host_metrics.get_record(session.xenapi.host.get_record(host)['metrics'])['memory_total']
-        mem_free          = session.xenapi.host_metrics.get_record(session.xenapi.host.get_record(host)['metrics'])['memory_free']
+    if metric:
+        mem_size          = metric['memory_total']
+        mem_free          = metric['memory_free']
         
         used_percent, outputdata , total, alloc = compute(hostname, mem_size, str(int(mem_size) - int(mem_free)), mem_free, warning, critical, performancedata_format, "_used_mem")
 
@@ -249,10 +248,12 @@ def check_mem(session, args):
     critical_hosts = []
     warning_hosts = []
 
-    hosts = session.xenapi.host.get_all()
-    for host in hosts:
-        hostname = session.xenapi.host.get_name_label(host)
-        exitcode, status, servicedata, perfdata, total, used = mem(session, host, warning, critical, performancedata_format)
+    hosts = session.xenapi.host.get_all_records()
+    host_metrics = session.xenapi.host_metrics.get_all_records()
+
+    for host_ref, host in hosts.items():
+        hostname = host['name_label']
+        exitcode, status, servicedata, perfdata, total, used = mem(hostname, host_metrics[host['metrics']], warning, critical, performancedata_format)
         if exitcode > finalexit:
             finalexit = exitcode
 
