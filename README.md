@@ -30,7 +30,7 @@ host: 192.168.0.1
 username: nagios
 password: nagios
 ```	
- - Uses https to connect to XenServer, if you have a pool, use a poolmaster IP/FQDN
+ - Uses https by default to connect to XenServer, if you have a pool, use a poolmaster IP/FQDN
  - Uses (python) XenAPI, download it from XenServer http://www.xenserver.org/partners/developing-products-for-xenserver.html and parse_rrd
 
 Credit for most of the code goes to ppanula, check http://exchange.nagios.org/directory/Plugins/System-Metrics/Storage-Subsystem/check_sr-2Epy/details for original code

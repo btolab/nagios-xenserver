@@ -8,7 +8,7 @@
 #
 # Usage: ./check_xenserver.py <XenServer IP or FQDN> <username> <password> <warning level %> <critical level %> <check_{sr,mem,cpu,hosts}>
 #
-# - Uses https to connect to XenServer, if you have a pool, use a poolmaster IP/FQDN
+# - Uses https by default to connect to XenServer, if you have a pool, use a poolmaster IP/FQDN
 # - Uses (python) XenAPI, download it from XenServer http://www.xenserver.org/partners/developing-products-for-xenserver.html and parse_rrd
 #
 # Credit for most of the code goes to ppanula, check http://exchange.nagios.org/directory/Plugins/System-Metrics/Storage-Subsystem/check_sr-2Epy/details for original code
@@ -331,7 +331,7 @@ def check_cpu(session, args):
 
     for host in hosts:
         v= []
-        url = 'https://'+session.xenapi.host.get_address(host)
+        url = args.scheme+'://'+session.xenapi.host.get_address(host)
         rrd_updates = parse_rrd.RRDUpdates()
         rrd_updates.refresh(session.handle, params, url)
         paramList = []
@@ -382,6 +382,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()	
     # Top level parser
+    parser.add_argument('-s', '--scheme',help="URL scheme (default: https)")
     parser.add_argument("pool",help="Pool Name as defined in config file or master IP address")
     parser.add_argument("config",help="Path to the config file")
 
@@ -415,6 +416,12 @@ if __name__ == "__main__":
         host = config.get(args.pool,'host')
     except:
         host = args.pool
+
+    try:
+        if not args.scheme:
+            args.scheme = config.get('general','scheme')
+    except:
+        args.scheme = 'https'
     
     username = config.get(args.pool,"username")
     password = config.get(args.pool,"password")
@@ -445,17 +452,18 @@ if __name__ == "__main__":
     
     # First acquire a valid session by logging in:
     try:
-        session = XenAPI.Session("https://"+host)
+        session = XenAPI.Session(args.scheme+"://"+host)
         session.xenapi.login_with_password(username, password)
     except XenAPI.Failure, e:
         if e.details[0] == "HOST_IS_SLAVE":
-            session=XenAPI.Session('https://'+e.details[1])
+            session=XenAPI.Session(args.scheme+'://'+e.details[1])
             session.xenapi.login_with_password(username, password)
         else:
             print "CRITICAL - XenAPI Error : " + e.details[0]
             sys.exit(2)
             
     except:
+        print args.scheme+'://'+host
         print "CRITICAL - Connection Error"
         sys.exit(2)
 
